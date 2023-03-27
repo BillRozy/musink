@@ -1,14 +1,14 @@
-import { ref } from 'vue';
+import type { YandexTokenObject } from 'api/types';
+import { ref, Ref } from 'vue';
 import { defineStore } from 'pinia';
 
 export const useYandexStore = defineStore('yandex', () => {
-  const playlist = ref([]);
-  const user = ref(null);
-  const loadPlaylist = () => {
-    // save to playlist
+  const token: Ref<YandexTokenObject | null> = ref(null);
+  const setToken = (newToken: YandexTokenObject) => {
+    token.value = newToken;
   };
-  const login = async (username: string, password: string) => {
-    // save to user
+  return {
+    token,
+    setToken,
   };
-  return { playlist, user, loadPlaylist, login };
 });

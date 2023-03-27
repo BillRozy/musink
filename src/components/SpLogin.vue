@@ -1,25 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useSpotifyAPI } from 'api'
-const api = useSpotifyAPI()
-const login = ref('')
-const password = ref('')
+import { useSpotifyAuthAPI } from 'api';
+import { useSpotifyStore } from 'src/stores/spotify';
+const { startLogin } = useSpotifyAuthAPI();
+const { setToken } = useSpotifyStore();
 const onSubmit = async () => {
-  return api.login()
-}
-const onReset = () => {
-  login.value = ''
-  password.value = ''
-}
-onSubmit()
+  const tokenObj = await startLogin();
+  console.log('onTokenReceived', tokenObj);
+  setToken(tokenObj);
+};
 </script>
 
 <template>
   <div class="q-pa-md" style="max-width: 400px">
-    <q-form @submit="onSubmit" @reset="onReset">
-      <q-input class="q-pa-md" label="Login" filled v-model="login" hint="Enter your login for Spotify Music"></q-input>
-      <q-input class="q-pa-md" type="password" label="Password" filled v-model="password" hint="Enter your password for Spotify Music"></q-input>
+    <q-form @submit="onSubmit">
+      <q-btn type="submit" label="Start Spotify Login" color="primary" size="xl"></q-btn>
     </q-form>
   </div>
-
 </template>

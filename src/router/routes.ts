@@ -2,6 +2,14 @@ import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
+    path: '/handleSpToken',
+    component: () => import('components/SpAfterLogin.vue'),
+  },
+  {
+    path: '/handleYaToken',
+    component: () => import('components/YaAfterLogin.vue'),
+  },
+  {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/HomePage.vue') }],
