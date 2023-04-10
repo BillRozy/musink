@@ -1,8 +1,3 @@
-export type OAuthTokenObject = {
-  access_token: string;
-  refresh_token: string;
-};
-
 export type UserProfile = {
   name: string;
   email: string;
@@ -19,9 +14,4 @@ export type Track = {
 export interface RestAPI {
   getCurrentUser: () => Promise<UserProfile>;
   getFavoriteTracks: () => Promise<Track[]>;
-}
-
-export interface AuthAPI {
-  requestToken: (code: string) => Promise<OAuthTokenObject>;
-  requestOAuthScreenUrl: () => Promise<string>;
 }

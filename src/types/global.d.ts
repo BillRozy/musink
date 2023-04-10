@@ -8,6 +8,13 @@ interface MusinkAPI {
   fetchJSON: (...args: Parameters<typeof fetch>) => Promise<object>;
   fetchURL: (...args: Parameters<typeof fetch>) => Promise<string>;
 }
+
+export type MusinkAPIProvider = 'yandex' | 'spotify';
+export type MusinkIPCEventAuth =
+  | `${MusinkAPIProvider}-oauth-get-token`
+  | `${MusinkAPIProvider}-oauth-refresh-token`;
+export type MusinkIPCEvent = MusinkIPCEventAuth;
+
 declare global {
   // eslint-disable-next-line
   var musinkAPI: MusinkAPI;

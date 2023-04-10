@@ -8,6 +8,3 @@ export const generateRandomString = (length: number) => {
   }
   return text;
 };
-
-export const fetchJSON = globalThis.musinkAPI.fetchJSON;
-export const fetchURL = globalThis.musinkAPI.fetchURL;

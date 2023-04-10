@@ -54,7 +54,8 @@ module.exports = configure(function (/* ctx */) {
         node: 'node16',
       },
       alias: {
-        api: path.join(__dirname, './api'),
+        api: path.join(__dirname, './src/api'),
+        'oauth-api': path.join(__dirname, './oauth-api'),
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "api/*": ["./api/*"],
+      "api/*": ["./src/api/*"],
+      "oauth-api/*": ["./oauth-api/*"],
       "components/*": ["./src/components/*"]
     }
   },

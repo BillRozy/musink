@@ -1,9 +1,10 @@
-import type { OAuthTokenObject } from '../api/types';
 import { app, BrowserWindow, nativeTheme, ipcMain } from 'electron';
 import { initialize } from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
 import fetch from 'node-fetch';
+import { useAuthHandler } from './auth-handler';
+import { MusinkAPIProvider } from '../src/types/global';
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
 initialize();
@@ -93,8 +94,6 @@ app.on('activate', () => {
   }
 });
 
-let modalWindow: BrowserWindow | null = null;
-
 ipcMain.handle(
   'fetchJSON',
   async (event, ...args: Parameters<typeof fetch>) => {
@@ -109,49 +108,7 @@ ipcMain.handle('fetchURL', async (event, ...args: Parameters<typeof fetch>) => {
   return resp.url;
 });
 
-ipcMain.handle('spotify-oauth-get-token', async (event, url: string) => {
-  console.log('spotify-oauth-get-token', url);
-  return new Promise((resolve, reject) => {
-    modalWindow = new BrowserWindow({
-      modal: true,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        sandbox: false,
-        // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
-        preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-      },
-    });
-    console.log('spotify-oauth-get-token1');
-    ipcMain.once('spotify-oauth-token', (_, tokenObj: OAuthTokenObject) => {
-      console.log('spotify-oauth-token once');
-      modalWindow?.close();
-      return resolve(tokenObj);
-    });
-    modalWindow.loadURL(url);
-    // modalWindow.on('error', (event) => {});
-  });
-});
-
-ipcMain.handle('yandex-oauth-get-token', async (event, url: string) => {
-  console.log('yandex-oauth-get-token');
-  return new Promise((resolve, reject) => {
-    modalWindow = new BrowserWindow({
-      modal: true,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        sandbox: false,
-        // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
-        preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-      },
-    });
-    ipcMain.once('yandex-oauth-token', (_, tokenObj: OAuthTokenObject) => {
-      console.log('yandex-oauth-token once');
-      modalWindow?.close();
-      return resolve(tokenObj);
-    });
-    modalWindow.loadURL(url);
-    // modalWindow.on('error', (event) => {});
-  });
+const apiProviders: MusinkAPIProvider[] = ['spotify', 'yandex'];
+apiProviders.map((provider) => {
+  useAuthHandler(provider);
 });
