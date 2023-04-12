@@ -2,7 +2,9 @@ import { app, BrowserWindow, nativeTheme, ipcMain } from 'electron';
 import { initialize } from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
-
+import fetch from 'node-fetch';
+import { useAuthHandler } from './auth-handler';
+import { MusinkAPIProvider } from '../src/types/global';
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
 initialize();
@@ -26,8 +28,9 @@ function createWindow() {
     width: 1000,
     height: 600,
     useContentSize: true,
+    // frame: false, // <-- add this
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,
       contextIsolation: true,
       sandbox: false,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
@@ -45,9 +48,15 @@ function createWindow() {
     (details, callback) => {
       callback({
         responseHeaders: {
-          ...(details.url.includes('yastatic.net')
+          ...(details.url.includes('yastatic.net') ||
+          details.url.includes('api/token') ||
+          details.url.includes('/me')
             ? {}
-            : { 'Access-Control-Allow-Origin': ['*'] }),
+            : {
+                'Access-Control-Allow-Origin': ['*'],
+                'Access-Control-Allow-Methods': ['*'],
+                'Access-Control-Allow-Headers': ['*'],
+              }),
           ...details.responseHeaders,
         },
       });
@@ -85,9 +94,21 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.on('oauth-modal', (event, url: string) => {
-  const childWindow = new BrowserWindow({
-    modal: true,
-  });
-  childWindow.loadURL(url);
+ipcMain.handle(
+  'fetchJSON',
+  async (event, ...args: Parameters<typeof fetch>) => {
+    const resp = await fetch(...args);
+    console.log(resp.url);
+    return resp.json();
+  }
+);
+
+ipcMain.handle('fetchURL', async (event, ...args: Parameters<typeof fetch>) => {
+  const resp = await fetch(...args);
+  return resp.url;
+});
+
+const apiProviders: MusinkAPIProvider[] = ['spotify', 'yandex'];
+apiProviders.map((provider) => {
+  useAuthHandler(provider);
 });

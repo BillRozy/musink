@@ -31,6 +31,14 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('musinkAPI', {
   sendToMainProcess: ipcRenderer.send,
+  onMainProcessEvent: ipcRenderer.on,
+  invokeInMainProcess: ipcRenderer.invoke,
+  fetchJSON(...args: Parameters<typeof fetch>): Promise<object> {
+    return ipcRenderer.invoke('fetchJSON', ...args) as Promise<object>;
+  },
+  fetchURL(...args: Parameters<typeof fetch>): Promise<string> {
+    return ipcRenderer.invoke('fetchURL', ...args) as Promise<string>;
+  },
 });
 
 export {};
