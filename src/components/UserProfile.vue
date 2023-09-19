@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { toRefs } from 'vue';
-import { UserProfile } from 'api/types';
+import type { UserProfile } from 'src/types/models';
 const props = defineProps<{
   user: UserProfile;
 }>();
@@ -12,7 +12,7 @@ const { user } = toRefs(props);
     <q-item>
       <q-item-section avatar>
         <q-avatar>
-          <img :src="user.imageURL" />
+          <img :src="user.image?.url" />
         </q-avatar>
       </q-item-section>
 

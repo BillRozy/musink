@@ -1,5 +1,4 @@
 import { AuthAPI, OAuthError, OAuthTokenObject } from '../types';
-import { stringify } from 'querystring';
 import { generateRandomString } from '../helpers';
 import fetch from 'node-fetch';
 
@@ -41,8 +40,8 @@ export default (): AuthAPI => {
           body: new URLSearchParams({
             client_id: clientId ?? '',
             client_secret: clientSecret ?? '',
-            grant_type: 'authorization_code',
-            code,
+            grant_type: 'token',
+            access_token: code,
           }).toString(),
         });
         if (resp.ok) {
@@ -53,22 +52,17 @@ export default (): AuthAPI => {
       });
     },
     async getOAuthURL(): Promise<string> {
-      const state = generateRandomString(16);
       const resp = await fetch(
         'https://oauth.yandex.com/authorize?' +
-          stringify({
-            response_type: 'code',
-            client_id: clientId,
-            scope: [
-              'login:birthday',
-              'login:email',
-              'login:info',
-              'login:avatar',
-            ],
-            state: state,
-            redirect_uri: redirectUri,
-          })
+          new URLSearchParams({
+            response_type: 'token',
+            client_id: clientId ?? '',
+            redirect_uri: redirectUri ?? '',
+            force_confirm: 'False',
+            language: 'en',
+          }).toString()
       );
+      console.log(resp);
       return resp.url;
     },
   };

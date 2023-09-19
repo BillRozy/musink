@@ -18,5 +18,8 @@ console.log(token);
   <ProviderLogin v-if="!token" :api-provider="apiProvider" class="flex-center"></ProviderLogin>
   <Suspense>
     <ProviderBoard v-if="token" :api-provider="apiProvider" class="flex-center"></ProviderBoard>
+    <template #fallback>
+      Loading...
+    </template>
   </Suspense>
 </template>

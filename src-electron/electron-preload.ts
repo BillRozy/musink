@@ -28,16 +28,21 @@
  * }
  */
 const { contextBridge, ipcRenderer } = require('electron');
+import { MusinkResponse } from '../src/types/global';
+
+function invoke<P extends any[], R>(channel: string, ...args: P) {
+  return ipcRenderer.invoke(channel, ...args) as Promise<R>;
+}
 
 contextBridge.exposeInMainWorld('musinkAPI', {
   sendToMainProcess: ipcRenderer.send,
   onMainProcessEvent: ipcRenderer.on,
   invokeInMainProcess: ipcRenderer.invoke,
-  fetchJSON(...args: Parameters<typeof fetch>): Promise<object> {
-    return ipcRenderer.invoke('fetchJSON', ...args) as Promise<object>;
+  fetch(...args: Parameters<typeof fetch>) {
+    return invoke<Parameters<typeof fetch>, MusinkResponse>('fetch', ...args);
   },
   fetchURL(...args: Parameters<typeof fetch>): Promise<string> {
-    return ipcRenderer.invoke('fetchURL', ...args) as Promise<string>;
+    return invoke('fetchURL', ...args) as Promise<string>;
   },
 });
 

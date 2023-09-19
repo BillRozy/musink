@@ -1,1 +1,1 @@
-export const fetchJSON = globalThis.musinkAPI.fetchJSON;
+export const fetch = globalThis.musinkAPI.fetch;

@@ -1,5 +1,4 @@
 import { AuthAPI, OAuthError, OAuthTokenObject } from '../types';
-import { stringify } from 'querystring';
 import { generateRandomString } from '../helpers';
 import fetch from 'node-fetch';
 
@@ -60,13 +59,13 @@ export default () => {
       const state = generateRandomString(16);
       const resp = await fetch(
         'https://accounts.spotify.com/authorize?' +
-          stringify({
+          new URLSearchParams({
             response_type: 'code',
-            client_id: clientId,
+            client_id: clientId ?? '',
             scope: 'user-read-private user-read-email user-library-read',
             state: state,
-            redirect_uri: redirectUri,
-          })
+            redirect_uri: redirectUri ?? '',
+          }).toString()
       );
       return resp.url;
     },

@@ -1,24 +1,31 @@
 import { RestAPI } from '../types';
-import { fetchJSON } from '../helpers';
+import { fetch } from '../helpers';
 import { FavoriteTracksResponse, UserProfile } from './types';
 import { useProviderStore } from 'src/stores';
 import { storeToRefs } from 'pinia';
 import avatar from 'assets/pngtree-cat-default-avatar-image.jpg';
+import { trackConverter } from './converters';
 
 export default (): RestAPI => {
   const store = useProviderStore('spotify');
   const { token } = storeToRefs(store);
-  const BASE_API = 'https://api.spotify.com/v1';
+  const BASE_API = 'https://api.spotify.com/v1/';
   const GET = async <T>(endpoint: string): Promise<T> => {
     await store.checkOrRefreshToken();
-    const resp = await fetchJSON(`${BASE_API}/${endpoint}`, {
+    const resp = await fetch(`${BASE_API}${endpoint}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token?.value?.access_token}`,
         'Content-Type': 'application/json',
       },
     });
-    return resp as T;
+    console.log(resp.url);
+    if (resp.ok) {
+      return resp.body as T;
+    } else {
+      console.log(resp.error);
+      throw new Error(resp.error?.message);
+    }
   };
   return {
     async getCurrentUser() {
@@ -33,12 +40,16 @@ export default (): RestAPI => {
       };
     },
     async getFavoriteTracks() {
-      const resp = await GET<FavoriteTracksResponse>('me/tracks');
-      console.log(resp);
-      return resp.items.map((item) => ({
-        name: item.track.name,
-        id: item.track.id,
-      }));
+      let resp = await GET<FavoriteTracksResponse>(
+        'me/tracks?offset=0&limit=50'
+      );
+      // loop and get all tracks
+      let tracks = [...resp.items];
+      while (resp.next) {
+        resp = await GET<FavoriteTracksResponse>(resp.next.split(BASE_API)[1]);
+        tracks = [...tracks, ...resp.items];
+      }
+      return tracks.map(trackConverter);
     },
   };
 };

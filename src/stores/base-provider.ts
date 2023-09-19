@@ -6,6 +6,8 @@ import { MusinkAPIProvider } from 'src/types/global';
 
 const EXPIRATION_THRESHOLD = 0.8;
 
+// TODO add obfuscation
+
 export const createProviderStore = (apiProvider: MusinkAPIProvider) =>
   defineStore(
     apiProvider,

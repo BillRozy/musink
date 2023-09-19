@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 import fetch from 'node-fetch';
 import { useAuthHandler } from './auth-handler';
-import { MusinkAPIProvider } from '../src/types/global';
+import { MusinkAPIProvider, MusinkResponse } from '../src/types/global';
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
 initialize();
@@ -94,14 +94,45 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.handle(
-  'fetchJSON',
-  async (event, ...args: Parameters<typeof fetch>) => {
-    const resp = await fetch(...args);
-    console.log(resp.url);
-    return resp.json();
-  }
-);
+function handleFetch(channel: string) {
+  ipcMain.handle(channel, async (event, ...args: Parameters<typeof fetch>) => {
+    return new Promise(async (resolve, reject) => {
+      const resp = await fetch(...args);
+      console.log(resp.url);
+      const body = await resp.json();
+      if (resp.ok) {
+        console.log(body);
+        resolve({
+          ok: resp.ok,
+          headers: resp.headers,
+          redirected: resp.redirected,
+          status: resp.status,
+          statusText: resp.statusText,
+          url: resp.url,
+          type: resp.type,
+          body,
+        } as MusinkResponse);
+      } else {
+        console.log(`Failed request: ${JSON.stringify(resp)}`);
+        resolve({
+          ok: resp.ok,
+          headers: resp.headers,
+          redirected: resp.redirected,
+          status: resp.status,
+          statusText: resp.statusText,
+          url: resp.url,
+          type: resp.type,
+          error: {
+            message: body,
+          },
+        } as MusinkResponse);
+        // reject(new Error(`Failed request: ${JSON.stringify(resp)}`));
+      }
+    });
+  });
+}
+
+handleFetch('fetch');
 
 ipcMain.handle('fetchURL', async (event, ...args: Parameters<typeof fetch>) => {
   const resp = await fetch(...args);
